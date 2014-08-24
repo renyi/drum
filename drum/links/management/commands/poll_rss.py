@@ -4,6 +4,7 @@ from datetime import datetime
 from optparse import make_option
 from time import mktime
 
+from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.management.base import BaseCommand
 from django.utils.timezone import get_default_timezone, make_aware
@@ -13,6 +14,11 @@ import requests
 from mezzanine.generic.models import Rating
 
 from drum.links.models import Link
+
+LINK_EXTRACTOR = getattr(settings, "LINK_EXTRACTOR", False)
+if LINK_EXTRACTOR:
+    import extraction
+    import urllib2
 
 
 class Command(BaseCommand):
@@ -46,19 +52,22 @@ class Command(BaseCommand):
         for url in urls:
             for entry in parse(url).entries:
                 link = self.entry_to_link_dict(entry)
-                if options["follow"]:
-                    try:
-                        link["link"] = self.follow_redirects(link["link"])
-                    except Exception as e:
-                        print "%s - skipping %s" % (e, link["link"])
-                        continue
-                link["user_id"] = user_id
                 try:
-                    obj = Link.objects.get(link=link["link"])
+                    Link.objects.get(link=link["link"])
                 except Link.DoesNotExist:
-                    obj = Link.objects.create(**link)
-                    obj.rating.add(Rating(value=1, user_id=user_id))
-                    print "Added %s" % obj
+                    if options["follow"]:
+                        try:
+                            link["link"] = self.follow_redirects(link["link"])
+                        except Exception as e:
+                            print "%s - skipping %s" % (e, link["link"])
+                            continue
+                    link["user_id"] = user_id
+                    try:
+                        obj = Link.objects.get(link=link["link"])
+                    except Link.DoesNotExist:
+                        obj = Link.objects.create(**link)
+                        obj.rating.add(Rating(value=1, user_id=user_id))
+                        print "Added %s" % obj
 
     def entry_to_link_dict(self, entry):
         link = {"title": entry.title, "gen_description": False}
@@ -74,6 +83,32 @@ class Command(BaseCommand):
             publish_date = datetime.fromtimestamp(mktime(publish_date))
             publish_date = make_aware(publish_date, get_default_timezone())
             link["publish_date"] = publish_date
+
+        if LINK_EXTRACTOR:
+            url = link["link"]
+            html = urllib2.build_opener().open(url).read()
+            extracted = extraction.Extractor().extract(html, source_url=url)
+
+            if link["title"]:
+                link["title"] = extracted.title
+
+            if extracted.description:
+                link["description"] = extracted.description
+
+            if extracted.image:
+                link["image"] = extracted.image
+
+            if extracted.images:
+                link["extra_images"] = ','.join(extracted.images)
+
+            link["extra_data"] = ','.join(extracted.titles + extracted.descriptions + extracted.urls)
+
+            # TODO: Check blank images (black or white)
+            #
+            # from PIL import Image
+            # im=Image.open(extracted.image)
+            # print im.im.getbbox()
+
         return link
 
     def follow_redirects(self, link):
