@@ -19,6 +19,12 @@ from drum.links.models import Link
 from drum.links.utils import order_by_score
 
 
+LINK_EXTRACTOR = getattr(settings, "LINK_EXTRACTOR", False)
+if LINK_EXTRACTOR:
+    import extraction
+    import urllib2
+
+
 class UserFilterView(ListView):
     """
     List view that puts a ``profile_user`` variable into the context,
@@ -111,19 +117,39 @@ class LinkCreate(CreateView):
     model = Link
 
     def form_valid(self, form):
-        hours = getattr(settings, "ALLOWED_DUPLICATE_LINK_HOURS", None)
-        if hours and form.instance.link:
-            lookup = {
-                "link": form.instance.link,
-                "publish_date__gt": now() - timedelta(hours=hours),
-            }
-            try:
-                link = Link.objects.get(**lookup)
-            except Link.DoesNotExist:
-                pass
-            else:
-                error(self.request, "Link exists")
-                return redirect(link)
+        if form.instance.link:
+            if LINK_EXTRACTOR:
+                html = urllib2.build_opener().open(form.instance.link).read()
+                extracted = extraction.Extractor().extract(html, source_url=form.instance.link)
+
+                if not form.instance.title:
+                    form.instance.title = extracted.title
+
+                if not form.instance.description:
+                    form.instance.description = extracted.description
+
+                if not form.instance.image:
+                    form.instance.image = extracted.image
+
+                if extracted.images:
+                    form.instance.extra_images = ','.join(extracted.images)
+
+                form.instance.extra_data = ','.join(extracted.titles + extracted.descriptions + extracted.urls)
+
+            hours = getattr(settings, "ALLOWED_DUPLICATE_LINK_HOURS", None)
+            if hours:
+                lookup = {
+                    "link": form.instance.link,
+                    "publish_date__gt": now() - timedelta(hours=hours),
+                }
+                try:
+                    link = Link.objects.get(**lookup)
+                except Link.DoesNotExist:
+                    pass
+                else:
+                    error(self.request, "Link exists")
+                    return redirect(link)
+
         form.instance.user = self.request.user
         form.instance.gen_description = False
         info(self.request, "Link created")
