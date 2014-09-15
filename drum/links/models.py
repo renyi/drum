@@ -25,8 +25,7 @@ from mezzanine.generic.fields import RatingField, CommentsField
 
 class Link(Displayable, Ownable):
 
-    link = models.URLField(null=True,
-        blank=(not getattr(settings, "LINK_REQUIRED", False)))
+    link = models.URLField(null=True, blank=False)
     rating = RatingField()
     comments = CommentsField()
     image = models.URLField(null=True, blank=True)

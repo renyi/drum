@@ -87,6 +87,11 @@ class Command(BaseCommand):
         if LINK_EXTRACTOR:
             url = link["link"]
             html = urllib2.build_opener().open(url).read()
+
+
+            #
+            # extraction
+            #
             extracted = extraction.Extractor().extract(html, source_url=url)
 
             if link["title"]:
@@ -102,6 +107,25 @@ class Command(BaseCommand):
                 link["extra_images"] = ','.join(extracted.images)
 
             link["extra_data"] = ','.join(extracted.titles + extracted.descriptions + extracted.urls)
+
+
+            # import newspaper
+            # url = "http://www.techinasia.com/category/business/"
+
+            # articles = newspaper.build(url)
+            # extracted = articles[0]
+            # extracted.download()
+            # extracted.parse()
+
+            # if link["title"]:
+            #     link["title"] = extracted.title
+
+            # if extracted.summary:
+            #     link["description"] = extracted.summary
+
+            # if extracted.top_image:
+            #     link["image"] = extracted.top_image
+
 
             # TODO: Check blank images (black or white)
             #

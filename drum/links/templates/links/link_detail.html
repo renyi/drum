@@ -1,17 +1,24 @@
 {% extends "base.html" %}
 
-{% load mezzanine_tags rating_tags comment_tags drum_tags future %}
+{% load i18n mezzanine_tags rating_tags comment_tags drum_tags future %}
 
 {% block meta_description %}{% metablock %}{{ object.description }}{% endmetablock %}{% endblock %}
 {% block meta_title %}{{ object.title }}{% endblock %}
 {% block title %}
-<a href="{{ object.url }}">{{ object.title }}</a>
+{% editable object.title %}{% endeditable %}
+<a href="{{ object.url }}">{% trans "More" %}</a>
 <span class="domain">({{ object.domain }})</span>
 {% endblock %}
 
 {% block main %}
 <div class="link-view">
-    <p class="description">{{ object.description }}</p>
+    {% if link.show_image and link.image %}
+        <p><img class="link-image_detail" src="{{ link.image }}"></p>
+    {% endif %}
+
+    <p class="description">
+        {% editable object.description %}{% endeditable %}
+    </p>
     <div class="link-meta">
         {% rating_for object %}
         by <a href="{% url "profile" object.user.username %}">{{ object.user.profile }}</a>

@@ -42,16 +42,22 @@ $(function() {
             });
         };
 
-        $('a').live('click', function(event) {
-            var host = location.protocol + '//' + location.hostname
-            if (this.href.substr('#') >= 0) {
+        $('a').on('click', function(event) {
+            var $editable_link = $(this).hasClass('editable-link');
+            var $editable_toolbar = $(this).parent().hasClass('editable-toolbar');
+
+            /* Quick hack to make editable works with drum's version of pajax */
+            if (!$editable_link && !$editable_toolbar) {
+                var host = location.protocol + '//' + location.hostname;
+                if (this.href.substr('#') >= 0) {
+                    return false;
+                } else if (this.href.indexOf(host) != 0 || event.which > 1 || event.metaKey || $(this).hasClass('no-pjax')) {
+                    return true;
+                }
+                pjax(this.href, true);
                 return false;
-            } else if (this.href.indexOf(host) != 0 || event.which > 1 || event.metaKey || $(this).hasClass('no-pjax')) {
-                return true;
             }
-            pjax(this.href, true);
-            return false;
-        })
+        });
 
         $(window).bind('popstate', function(event) {
             if (initial) {
