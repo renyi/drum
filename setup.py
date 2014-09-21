@@ -39,6 +39,8 @@ try:
         install_requires=[
             "mezzanine >= 3.0",
             "sphinx-me",
+            "feedparser",
+            "extraction",            
         ],
 
         classifiers=[
