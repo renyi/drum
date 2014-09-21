@@ -22,8 +22,6 @@ from mezzanine.utils.models import upload_to
 from mezzanine.generic.models import Rating
 from mezzanine.generic.fields import RatingField, CommentsField
 
-from taggit.managers import TaggableManager
-
 
 class Link(Displayable, Ownable):
 
@@ -34,8 +32,6 @@ class Link(Displayable, Ownable):
     show_image = models.BooleanField(default=True)
     extra_images = models.TextField(null=True, blank=True)
     extra_data = models.TextField(null=True, blank=True)
-
-    tags = TaggableManager()
 
     def get_absolute_url(self):
         return reverse("link_detail", kwargs={"slug": self.slug})
