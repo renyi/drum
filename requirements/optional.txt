@@ -1,0 +1,5 @@
+# Required for poll_rss
+feedparser
+
+# Required for link extraction
+extraction

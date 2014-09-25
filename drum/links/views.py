@@ -18,8 +18,11 @@ from drum.links.forms import LinkForm
 from drum.links.models import Link
 from drum.links.utils import order_by_score
 
-import extraction
-import urllib2
+
+EXTRACT_LINKS = getattr(settings, "EXTRACT_LINKS", False)
+if EXTRACT_LINKS:
+    import extraction
+    import urllib2
 
 
 class UserFilterView(ListView):
@@ -115,22 +118,23 @@ class LinkCreate(CreateView):
 
     def form_valid(self, form):
         if form.instance.link:
-            html = urllib2.build_opener().open(form.instance.link).read()
-            extracted = extraction.Extractor().extract(html, source_url=form.instance.link)
+            if EXTRACT_LINKS:
+                html = urllib2.build_opener().open(form.instance.link).read()
+                extracted = extraction.Extractor().extract(html, source_url=form.instance.link)
 
-            if not form.instance.title:
-                form.instance.title = extracted.title
+                if not form.instance.title:
+                    form.instance.title = extracted.title
 
-            if not form.instance.description:
-                form.instance.description = extracted.description
+                if not form.instance.description:
+                    form.instance.description = extracted.description
 
-            if not form.instance.image:
-                form.instance.image = extracted.image
+                if not form.instance.image:
+                    form.instance.image = extracted.image
 
-            if extracted.images:
-                form.instance.extra_images = ','.join(extracted.images)
+                if extracted.images:
+                    form.instance.extra_images = ','.join(extracted.images)
 
-            form.instance.extra_data = ','.join(extracted.titles + extracted.descriptions + extracted.urls)
+                form.instance.extra_data = ','.join(extracted.titles + extracted.descriptions + extracted.urls)
 
             hours = getattr(settings, "ALLOWED_DUPLICATE_LINK_HOURS", None)
             if hours:
@@ -185,4 +189,3 @@ class CommentList(ScoreOrderingView):
             return "Best comments"
         else:
             return "Latest comments"
-

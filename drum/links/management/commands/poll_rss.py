@@ -15,8 +15,8 @@ from mezzanine.generic.models import Rating
 
 from drum.links.models import Link
 
-LINK_EXTRACTOR = getattr(settings, "LINK_EXTRACTOR", False)
-if LINK_EXTRACTOR:
+EXTRACT_LINKS = getattr(settings, "EXTRACT_LINKS", False)
+if EXTRACT_LINKS:
     import extraction
     import urllib2
 
@@ -84,10 +84,9 @@ class Command(BaseCommand):
             publish_date = make_aware(publish_date, get_default_timezone())
             link["publish_date"] = publish_date
 
-        if LINK_EXTRACTOR:
+        if EXTRACT_LINKS:
             url = link["link"]
             html = urllib2.build_opener().open(url).read()
-
 
             #
             # extraction
@@ -107,7 +106,6 @@ class Command(BaseCommand):
                 link["extra_images"] = ','.join(extracted.images)
 
             link["extra_data"] = ','.join(extracted.titles + extracted.descriptions + extracted.urls)
-
 
             # import newspaper
             # url = "http://www.techinasia.com/category/business/"

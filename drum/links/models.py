@@ -16,9 +16,7 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 
 from mezzanine.core.models import Displayable, Ownable
-from mezzanine.core.fields import FileField
 from mezzanine.core.request import current_request
-from mezzanine.utils.models import upload_to
 from mezzanine.generic.models import Rating
 from mezzanine.generic.fields import RatingField, CommentsField
 
@@ -28,6 +26,8 @@ class Link(Displayable, Ownable):
     link = models.URLField(null=True, blank=False)
     rating = RatingField()
     comments = CommentsField()
+
+    # Extraction metadata
     image = models.URLField(null=True, blank=True)
     show_image = models.BooleanField(default=True)
     extra_images = models.TextField(null=True, blank=True)
