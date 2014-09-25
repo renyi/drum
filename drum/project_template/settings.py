@@ -77,7 +77,7 @@ from __future__ import absolute_import, unicode_literals
 
 # If True, the south application will be automatically added to the
 # INSTALLED_APPS setting.
-USE_SOUTH = True
+USE_SOUTH = False
 
 
 ########################
@@ -324,6 +324,8 @@ SEARCH_MODEL_CHOICES = ("links.Link",)
 ALLOWED_DUPLICATE_LINK_HOURS = 24 * 7 * 3
 ITEMS_PER_PAGE = 20
 LINK_REQUIRED = False
+EXTRACT_LINKS = False
+LINK_ONLY = False
 
 ###################
 # DEPLOY SETTINGS #
