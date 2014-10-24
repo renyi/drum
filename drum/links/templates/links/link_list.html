@@ -13,10 +13,19 @@
     <div class="link-detail{% if link.rating_sum < 0 %} link-negative{% endif %}">
         <a href="{{ link.url }}">{{ link.title }}</a> <span class="domain">({{ link.domain }})</span>
 
-            by <a class="profile" href="{% url "profile" link.user.username %}">{{ link.user.profile }}</a>
-            {{ link.publish_date|short_timesince }} ago |
-            <a class="comments" href="{{ link.get_absolute_url }}">{{ link.comments_count }} comment{{ link.comments_count|pluralize }} </a>
+        <small>
+            <br>
+                by <a class="profile" href="{% url "profile" link.user.username %}">{{ link.user.profile }}</a>
+                {{ link.publish_date|short_timesince }} ago |
+                <a class="comments" href="{{ link.get_absolute_url }}">{{ link.comments_count }} comment{{ link.comments_count|pluralize }} </a>
 
+            {% if link.tags.all %}
+            | Tags:
+            {% for tag in link.tags.all %}
+                <a href="{% url "tag_list" tag.slug %}">{{ tag|title }}</a>{% if not forloop.last %}, {% endif %}
+            {% endfor %}
+            {% endif %}
+        </small>
     </div>
 </div>
 {% empty %}
