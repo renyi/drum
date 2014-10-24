@@ -12,10 +12,6 @@
 
 {% block main %}
 <div class="link-view">
-    {% if link.show_image and link.image %}
-        <p><img class="link-image_detail" src="{{ link.image }}"></p>
-    {% endif %}
-
     <p class="description">
         {% editable object.description %}{% endeditable %}
     </p>
