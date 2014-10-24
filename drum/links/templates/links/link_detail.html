@@ -6,8 +6,8 @@
 {% block meta_title %}{{ object.title }}{% endblock %}
 {% block title %}
 {% editable object.title %}{% endeditable %}
-<a href="{{ object.url }}">{% trans "More" %}</a>
 <span class="domain">({{ object.domain }})</span>
+<a href="{{ object.url }}">{% trans "Read More" %}</a>
 {% endblock %}
 
 {% block main %}
