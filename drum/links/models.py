@@ -9,23 +9,35 @@ try:
 except ImportError:
     from urlparse import urlparse
 
+from taggit.managers import TaggableManager
+
 from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
-from mezzanine.core.models import Displayable, Ownable
+from mezzanine.core.models import Slugged, Displayable, Ownable
 from mezzanine.core.request import current_request
 from mezzanine.generic.models import Rating
 from mezzanine.generic.fields import RatingField, CommentsField
 
 
+class LinkCategory(Slugged):
+    class Meta:
+        verbose_name_plural = "Categories"
+
+    def get_absolute_url(self):
+        return reverse("category_list", kwargs={"slug": self.slug})
+
+
 class Link(Displayable, Ownable):
+    category = models.ForeignKey("links.LinkCategory", null=True, blank=True)
 
     link = models.URLField(null=True, blank=False)
     rating = RatingField()
     comments = CommentsField()
+    tags = TaggableManager()
 
     # Extraction metadata
     image = models.URLField(null=True, blank=True)
@@ -45,6 +57,14 @@ class Link(Displayable, Ownable):
         if self.link:
             return self.link
         return current_request().build_absolute_uri(self.get_absolute_url())
+
+    def image_tag(self):
+        if self.image:
+            return "<img height='100px' src='%s'>" % self.image
+        else:
+            return ""
+    image_tag.short_description = 'Image'
+    image_tag.allow_tags = True
 
 
 class Profile(models.Model):

@@ -38,7 +38,8 @@ try:
 
         install_requires=[
             "mezzanine >= 3.0",
-            "sphinx-me",        
+            "sphinx-me",
+            "django-taggit",
         ],
 
         classifiers=[

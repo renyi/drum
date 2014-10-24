@@ -9,10 +9,10 @@ from drum.links.models import Link
 LINK_ONLY = getattr(settings, "LINK_ONLY", False)
 
 if LINK_ONLY:
-    LinkForm = modelform_factory(Link, fields=["link"])
+    LinkForm = modelform_factory(Link, fields=["link", "category", "tags"])
 
 else:
-    BaseLinkForm = modelform_factory(Link, fields=["title", "link", "description"])
+    BaseLinkForm = modelform_factory(Link, fields=["title", "link", "description", "category", "tags"])
 
     class LinkForm(BaseLinkForm):
         def clean(self):

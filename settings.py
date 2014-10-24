@@ -11,7 +11,7 @@ MEDIA_ROOT = os.path.join(PROJECT_ROOT, *MEDIA_URL.strip("/").split("/"))
 ROOT_URLCONF = "%s.urls" % PROJECT_DIRNAME
 TEMPLATE_DIRS = (os.path.join(PROJECT_ROOT, "templates"),)
 
-INSTALLED_APPS = (
+INSTALLED_APPS = [
     "drum",
     "django.contrib.admin",
     "django.contrib.auth",
@@ -26,7 +26,8 @@ INSTALLED_APPS = (
     "mezzanine.core",
     "mezzanine.generic",
     "mezzanine.accounts",
-)
+    "taggit",
+]
 
 MIDDLEWARE_CLASSES = (["mezzanine.core.middleware.UpdateCacheMiddleware"] +
                       list(MIDDLEWARE_CLASSES) +
@@ -51,6 +52,10 @@ ADMIN_MENU_ORDER = (
 # Drum
 ALLOWED_DUPLICATE_LINK_HOURS = 24 * 7 * 3
 ITEMS_PER_PAGE = 20
+
+SOUTH_MIGRATION_MODULES = {
+    'taggit': 'taggit.south_migrations',
+}
 
 try:
     from local_settings import *

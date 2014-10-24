@@ -8,14 +8,15 @@ from django.contrib.messages import info, error
 
 from django.shortcuts import get_object_or_404, redirect
 from django.utils.timezone import now
-from django.views.generic import ListView, CreateView, DetailView
+from django.views.generic import (ListView, CreateView, DetailView,
+    DeleteView, UpdateView)
 
 from mezzanine.conf import settings
 from mezzanine.generic.models import ThreadedComment
 from mezzanine.utils.views import paginate
 
 from drum.links.forms import LinkForm
-from drum.links.models import Link
+from drum.links.models import Link, LinkCategory
 from drum.links.utils import order_by_score
 
 
@@ -189,3 +190,25 @@ class CommentList(ScoreOrderingView):
             return "Best comments"
         else:
             return "Latest comments"
+
+
+class CategoryList(LinkList):
+    def get_queryset(self):
+        qs = super(CategoryList, self).get_queryset()
+        slug = self.kwargs.get("slug", None)
+
+        if slug:
+            qs = qs.filter(category__slug=slug)
+
+        return qs
+
+
+class TagList(LinkList):
+    def get_queryset(self):
+        qs = super(TagList, self).get_queryset()
+        slug = self.kwargs.get("slug", None)
+
+        if slug:
+            qs = qs.filter(tags__slug__in=[slug]).distinct()
+
+        return qs

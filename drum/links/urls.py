@@ -3,10 +3,30 @@ from __future__ import unicode_literals
 from django.conf.urls import patterns, url
 from django.contrib.auth.decorators import login_required
 
-from drum.links.views import LinkList, LinkCreate, LinkDetail, CommentList
+from drum.links.views import (LinkList, LinkCreate, LinkDetail, CommentList,
+    CategoryList, TagList)
 
 
 urlpatterns = patterns("",
+    # Fallback for typo
+    url("^category/$",
+        LinkList.as_view()),
+
+    url("^category/(?P<slug>.*)/$",
+        CategoryList.as_view(),
+        name="category_list"),
+
+    # Fallback for typo
+    url("^tag/$",
+        LinkList.as_view()),
+
+    url("^tag/(?P<slug>.*)/$",
+        TagList.as_view(),
+        name="tag_list"),
+)
+
+
+urlpatterns += patterns("",
     url("^$",
         LinkList.as_view(),
         name="home"),

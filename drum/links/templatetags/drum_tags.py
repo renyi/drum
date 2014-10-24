@@ -1,11 +1,12 @@
 from __future__ import unicode_literals
 
 from collections import defaultdict
-from django import template
 from django.template.defaultfilters import timesince
 
+from mezzanine import template
 from drum.links.utils import order_by_score
 from drum.links.views import CommentList
+from drum.links.models import LinkCategory
 
 
 register = template.Library()
@@ -28,3 +29,8 @@ def order_comments_by_score_for(context, link):
 @register.filter
 def short_timesince(date):
     return timesince(date).split(",")[0]
+
+
+@register.as_tag
+def link_category_list(*args):
+    return LinkCategory.objects.all()
