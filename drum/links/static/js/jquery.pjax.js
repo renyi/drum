@@ -26,12 +26,12 @@ if (window.history && window.history.pushState && !navigator.userAgent.match(/(i
                 document.getElementsByTagName('body')[0].innerHTML = body;
                 setRatingClick();
 
-$(function() {
-    $('.reply').click(function() {
-        $('.reply-form').hide();
-        $(this).next('.reply-form').toggle();
+    $(function() {
+        $('.reply').click(function() {
+            $('.reply-form').hide();
+            $(this).next('.reply-form').toggle();
+        });
     });
-});
 
     $('.middle input:text, .middle input:password, textarea').addClass('input-xlarge');
     $('.control-group label').addClass('control-label');
@@ -45,9 +45,12 @@ $(function() {
         $('a').on('click', function(event) {
             var $editable_link = $(this).hasClass('editable-link');
             var $editable_toolbar = $(this).parent().hasClass('editable-toolbar');
+            var $nopajax = $(this).hasClass('nopajax');
+
+            var nopajax = !($editable_link) && !($editable_toolbar) && !($nooajax);
 
             /* Quick hack to make editable works with drum's version of pajax */
-            if (!$editable_link && !$editable_toolbar) {
+            if (nopajax) {
                 var host = location.protocol + '//' + location.hostname;
                 if (this.href.substr('#') >= 0) {
                     return false;
