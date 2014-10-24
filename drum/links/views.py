@@ -202,6 +202,15 @@ class CategoryList(LinkList):
 
         return qs
 
+    def get_title(self, context):
+        title = super(CategoryList, self).get_title(context)
+
+        slug = self.kwargs.get("slug", None)
+        if slug:
+            title = slug.title().replace("-", " ")
+
+        return title
+
 
 class TagList(LinkList):
     def get_queryset(self):
@@ -212,3 +221,12 @@ class TagList(LinkList):
             qs = qs.filter(tags__slug__in=[slug]).distinct()
 
         return qs
+
+    def get_title(self, context):
+        title = super(TagList, self).get_title(context)
+
+        slug = self.kwargs.get("slug", None)
+        if slug:
+            title = slug.title().replace("-", " ")
+
+        return title
