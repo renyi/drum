@@ -1,23 +1,30 @@
 from __future__ import unicode_literals
 from django.conf import settings
+from django import forms
 from django.forms.models import modelform_factory
 from django.forms import ValidationError
 
 from drum.links.models import Link
 
 
-LINK_ONLY = getattr(settings, "LINK_ONLY", False)
+BaseLinkForm = modelform_factory(Link, fields=["link", "title", "description", "category", "tags"])
 
-if LINK_ONLY:
-    LinkForm = modelform_factory(Link, fields=["link", "category", "tags"])
+class LinkForm(BaseLinkForm):
+    link = forms.CharField(widget=forms.TextInput(attrs={"autocomplete": "off", 
+                                                         "placeholder": "http://",
+                                                         }))
 
-else:
-    BaseLinkForm = modelform_factory(Link, fields=["title", "link", "description", "category", "tags"])
+    title = forms.CharField(widget=forms.TextInput(attrs={"autocomplete": "off", 
+                                                         "placeholder": "Leave blank to use original title.",
+                                                         }))
 
-    class LinkForm(BaseLinkForm):
-        def clean(self):
-            link = self.cleaned_data.get("link", None)
-            description = self.cleaned_data.get("description", None)
-            if not link and not description:
-                raise ValidationError("Either a link or description is required")
-            return self.cleaned_data
+    description = forms.CharField(widget=forms.Textarea(attrs={"autocomplete": "off", 
+                                                               "placeholder": "Leave blank to generate from site.",
+                                                         }))
+
+    def clean(self):
+        link = self.cleaned_data.get("link", None)
+        description = self.cleaned_data.get("description", None)
+        if not link and not description:
+            raise ValidationError("Either a link or description is required")
+        return self.cleaned_data
