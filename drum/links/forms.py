@@ -12,15 +12,18 @@ BaseLinkForm = modelform_factory(Link, fields=["link", "title", "description", "
 class LinkForm(BaseLinkForm):
     link = forms.CharField(widget=forms.TextInput(attrs={"autocomplete": "off", 
                                                          "placeholder": "http://",
-                                                         }))
+                                                         }),
+                           required=False)
 
     title = forms.CharField(widget=forms.TextInput(attrs={"autocomplete": "off", 
                                                          "placeholder": "Leave blank to use original title.",
-                                                         }))
+                                                         }),
+                            required=False)
 
     description = forms.CharField(widget=forms.Textarea(attrs={"autocomplete": "off", 
                                                                "placeholder": "Leave blank to generate from site.",
-                                                         }))
+                                                         }),
+                                  required=False)
 
     def clean(self):
         link = self.cleaned_data.get("link", None)
