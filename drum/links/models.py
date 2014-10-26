@@ -37,7 +37,7 @@ class Link(Displayable, Ownable):
     link = models.URLField(null=True, blank=False)
     rating = RatingField()
     comments = CommentsField()
-    tags = TaggableManager()
+    tags = TaggableManager(blank=True)
 
     # Extraction metadata
     image = models.URLField(null=True, blank=True)
