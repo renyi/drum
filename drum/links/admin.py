@@ -10,8 +10,9 @@ class LinkAdmin(DisplayableAdmin):
     list_display = ("id", "title", "category", "status", "publish_date",
                     "user", "comments_count", "rating_sum", "image_tag")
     list_display_links = ("id",)
-    list_editable = ("status", "category")
+    list_editable = ("status", "category", "status")
     list_filter = ("status", "user__username", "category")
+    search_fields = ("title", "link", "user__username", "user__email")
     ordering = ("-publish_date",)
 
     fieldsets = (
