@@ -5,24 +5,27 @@
 {% block meta_description %}{% metablock %}{{ object.description }}{% endmetablock %}{% endblock %}
 {% block meta_title %}{{ object.title }}{% endblock %}
 {% block title %}
-<a href="object.url">{% editable object.title %}{% endeditable %}</a>
+{% editable object.title %}{% endeditable %}
 {% endblock %}
 
 
 {% block main %}
 <div class="link-view">
-    <p class="description">
-        <small>
+    <small>        
         <span class="domain">({{ object.domain }})</span>
-
+        
         {% if object.tags.all %}| Tags:
         {% for tag in object.tags.all %}
             <a href="{% url "tag_list" tag.slug %}">{{ tag|title }}</a>{% if not forloop.last %}, {% endif %}
         {% endfor %}{% endif %}
-        </small>
+    </small>     
 
+    <p class="description">
         {% editable object.description %}{% endeditable %}
     </p>
+
+    <p><a href="object.url">{% trans "Read more" %}</a></p>
+
     <div class="link-meta">
         {% rating_for object %}
         by <a href="{% url "profile" object.user.username %}">{{ object.user.profile }}</a>
