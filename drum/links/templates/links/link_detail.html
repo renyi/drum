@@ -24,7 +24,7 @@
         {% editable object.description %}{% endeditable %}
     </p>
 
-    <p><a href="object.url">{% trans "Read more" %}</a></p>
+    <p><a href="{{ object.url }}">{% trans "Read more" %}</a></p>
 
     <div class="link-meta">
         {% rating_for object %}
