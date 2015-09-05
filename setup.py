@@ -51,7 +51,9 @@ try:
         packages=find_packages(),
 
         install_requires=[
-            "mezzanine >= 3.0",
+            "beautifulsoup4",
+            "django < 1.7",
+            "mezzanine < 4.0",
             "sphinx-me",
             "django-taggit",
         ],
