@@ -1,32 +1,25 @@
 {% extends "base.html" %}
 
-{% load i18n mezzanine_tags rating_tags comment_tags drum_tags future %}
+{% load mezzanine_tags rating_tags keyword_tags comment_tags drum_tags future %}
 
 {% block meta_description %}{% metablock %}{{ object.description }}{% endmetablock %}{% endblock %}
 {% block meta_title %}{{ object.title }}{% endblock %}
 {% block title %}
-<a href="object.url">{% editable object.title %}{% endeditable %}</a>
+<a href="{{ object.url }}">{{ object.title }}</a>
+<span class="domain">({{ object.domain }})</span>
 {% endblock %}
-
 
 {% block main %}
 <div class="link-view">
-    <p class="description">
-        <small>
-        <span class="domain">({{ object.domain }})</span>
-
-        {% if object.tags.all %}| Tags:
-        {% for tag in object.tags.all %}
-            <a href="{% url "tag_list" tag.slug %}">{{ tag|title }}</a>{% if not forloop.last %}, {% endif %}
-        {% endfor %}{% endif %}
-        </small>
-
-        {% editable object.description %}{% endeditable %}
-    </p>
+    <p class="description">{{ object.description }}</p>
     <div class="link-meta">
         {% rating_for object %}
-        by <a href="{% url "profile" object.user.username %}">{{ object.user.profile }}</a>
+        by <a href="{% url "profile" object.user.username %}">{{ object.user|get_profile }}</a>
         {{ object.publish_date|short_timesince }} ago
+        {% keywords_for link as tags %}
+        {% for tag in tags %}
+        | <a href="{% url "link_list_tag" tag.slug %}">{{ tag }}</a>
+        {% endfor %}
     </div>
     {% order_comments_by_score_for object %}
     {% comments_for object %}

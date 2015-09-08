@@ -9,10 +9,11 @@ from django.contrib.messages import info, error
 from django.shortcuts import get_object_or_404, redirect
 from django.utils.timezone import now
 from django.views.generic import (ListView, CreateView, DetailView,
-    DeleteView, UpdateView)
+    TemplateView, DeleteView, UpdateView)
 
+from mezzanine.accounts import get_profile_model
 from mezzanine.conf import settings
-from mezzanine.generic.models import ThreadedComment
+from mezzanine.generic.models import ThreadedComment, Keyword
 from mezzanine.utils.views import paginate
 
 from drum.links.forms import LinkForm
@@ -24,6 +25,11 @@ EXTRACT_LINKS = getattr(settings, "EXTRACT_LINKS", False)
 if EXTRACT_LINKS:
     import extraction
     import urllib2
+
+# Returns the name to be used for reverse profile lookups from the user
+# object. That's "profile" for the ``drum.links.Profile``, but otherwise
+# depends on the model specified in ``AUTH_PROFILE_MODULE``.
+USER_PROFILE_RELATED_NAME = get_profile_model().user.field.related_query_name()
 
 
 class UserFilterView(ListView):
@@ -41,11 +47,15 @@ class UserFilterView(ListView):
         except KeyError:
             profile_user = None
         else:
-            users = User.objects.select_related("profile")
+            users = User.objects.select_related(USER_PROFILE_RELATED_NAME)
             lookup = {"username__iexact": username, "is_active": True}
             profile_user = get_object_or_404(users, **lookup)
             qs = context["object_list"].filter(user=profile_user)
             context["object_list"] = qs
+            # Update context_object_name variable
+            context_object_name = self.get_context_object_name(context["object_list"])
+            context[context_object_name] = context["object_list"]
+
         context["profile_user"] = profile_user
         context["no_data"] = ("Whoa, there's like, literally no data here, "
                               "like seriously, I totally got nothin.")
@@ -74,6 +84,9 @@ class ScoreOrderingView(UserFilterView):
             qs = qs.order_by("-" + self.date_field)
         context["object_list"] = paginate(qs, self.request.GET.get("page", 1),
             settings.ITEMS_PER_PAGE, settings.MAX_PAGING_LINKS)
+        # Update context_object_name variable
+        context_object_name = self.get_context_object_name(context["object_list"])
+        context[context_object_name] = context["object_list"]
         context["title"] = self.get_title(context)
         return context
 
@@ -84,7 +97,10 @@ class LinkView(object):
     queryset.
     """
     def get_queryset(self):
-        return Link.objects.published().select_related("user", "user__profile")
+        return Link.objects.published().select_related(
+            "user",
+            "user__%s" % USER_PROFILE_RELATED_NAME
+        )
 
 
 class LinkList(LinkView, ScoreOrderingView):
@@ -98,11 +114,24 @@ class LinkList(LinkView, ScoreOrderingView):
     date_field = "publish_date"
     score_fields = ["rating_sum", "comments_count"]
 
+    def get_queryset(self):
+        queryset = super(LinkList, self).get_queryset()
+        tag = self.kwargs.get("tag")
+        if tag:
+            queryset = queryset.filter(keywords__keyword__slug=tag)
+        return queryset.prefetch_related("keywords__keyword")
+
     def get_title(self, context):
+        tag = self.kwargs.get("tag")
+        if tag:
+            return get_object_or_404(Keyword, slug=tag).title
         if context["by_score"]:
             return ""  # Homepage
         if context["profile_user"]:
-            return "Links by %s" % context["profile_user"].profile
+            return "Links by %s" % getattr(
+                context["profile_user"],
+                USER_PROFILE_RELATED_NAME
+            )
         else:
             return "Newest"
 
@@ -179,13 +208,16 @@ class CommentList(ScoreOrderingView):
 
     def get_queryset(self):
         qs = ThreadedComment.objects.filter(is_removed=False, is_public=True)
-        select = ["user", "user__profile"]
+        select = ["user", "user__%s" % (USER_PROFILE_RELATED_NAME)]
         prefetch = ["content_object"]
         return qs.select_related(*select).prefetch_related(*prefetch)
 
     def get_title(self, context):
         if context["profile_user"]:
-            return "Comments by %s" % context["profile_user"].profile
+            return "Comments by %s" % getattr(
+                context["profile_user"],
+                USER_PROFILE_RELATED_NAME
+            )
         elif context["by_score"]:
             return "Best comments"
         else:
