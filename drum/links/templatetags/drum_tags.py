@@ -4,6 +4,8 @@ from collections import defaultdict
 from django.template.defaultfilters import timesince
 
 from mezzanine import template
+from mezzanine.generic.models import ThreadedComment
+
 from drum.links.utils import order_by_score
 from drum.links.models import LinkCategory
 from drum.links.views import CommentList, USER_PROFILE_RELATED_NAME
@@ -45,3 +47,9 @@ def short_timesince(date):
 @register.as_tag
 def link_category_list(*args):
     return LinkCategory.objects.all()
+
+
+@register.as_tag
+def latest_comments(limit=5, *args):
+    qs = ThreadedComment.objects.filter(is_removed=False, is_public=True)
+    return qs.reverse()[:limit]
