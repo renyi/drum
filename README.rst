@@ -113,6 +113,17 @@ all tags in the database to all links in the database, as would occur
 if they were newly created. The ``--remove`` option will cause all
 existing tags to be removed.
 
+New goodies
+===========
+
+Note: Some may be deprecated, as they are already implemented on upstream fork.
+
+* Supports auto model population using link `extraction <https://github.com/lethain/extraction>`_.
+* `Django-taggit <https://github.com/alex/django-taggit>`_ integration.
+* Added Link categories.
+* Fixed pajax and {% editable %}.
+* Added .nopajax class to disable pajax call for that <a>.
+
 
 Contributing
 ============
